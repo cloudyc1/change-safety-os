@@ -42,7 +42,7 @@ Before applying CSO commands, discover the project's local rules:
 
 When the user asks to install CSO:
 
-1. Install the package with `python3 -m pip install change-safety-os`, or use
+1. Install the package with `python3 -m pip install secso`, or use
    `python3 -m pip install git+https://github.com/cloudyc1/change-safety-os.git`
    before the package is published to PyPI.
 2. Run `cso init` from the target project root.
@@ -52,8 +52,8 @@ When the user asks to install CSO:
 4. Confirm the project can run `cso finalize` after a safety record exists.
 
 If the repository only contains the skill but not the CLI, explain that the skill
-can guide behavior but executable safety checks require the `change-safety-os`
-package and a project-local `change-safety-os/config` directory.
+can guide behavior but executable safety checks require the `secso` package and
+a project-local `change-safety-os/config` directory.
 
 ## Before editing
 

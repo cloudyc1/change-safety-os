@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 build/
+dist/
 *.egg-info/
 reports/
 graph/

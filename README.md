@@ -22,10 +22,10 @@ target change works and that adjacent behavior was checked.
 When the package is published to PyPI:
 
 ```bash
-python3 -m pip install change-safety-os
+python3 -m pip install secso
 ```
 
-The package name is `change-safety-os`; the installed command is `cso`.
+The PyPI package name is `secso`; the installed command is `cso`.
 Do not use `pip install cso` unless you intentionally want a different package
 with that PyPI name.
 
@@ -59,7 +59,7 @@ In a target project, you can ask Codex:
 ```text
 Install CSO:
 1. Run python3 -m pip install git+https://github.com/cloudyc1/change-safety-os.git
-   unless change-safety-os is already available from PyPI.
+   unless secso is already available from PyPI.
 2. Run cso init in this repository.
 3. Merge change-safety-os/templates/agents-snippet.md into AGENTS.md.
 4. Adapt change-safety-os/config/*.yaml to this project's domains, contracts, and checks.
@@ -151,7 +151,7 @@ cso --help
 
 This installs the current checkout in editable mode only to verify packaging.
 It is not the user-facing install command. End users should use
-`python3 -m pip install change-safety-os` after PyPI publishing, or the GitHub
+`python3 -m pip install secso` after PyPI publishing, or the GitHub
 install command before publishing.
 
 ## License

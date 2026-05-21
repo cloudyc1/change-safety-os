@@ -1,0 +1,130 @@
+domains:
+  backend_api:
+    risk: high
+    files:
+      - backend/**
+      - server/**
+      - app/**
+      - api/**
+      - src/server/**
+    adjacent_domains:
+      - frontend_ui
+      - database_persistence
+      - external_integrations
+      - auth_permissions
+    contracts:
+      - api_contract
+      - persistence_contract
+      - auth_permission_contract
+    guards:
+      - backend_guard
+
+  frontend_ui:
+    risk: medium
+    files:
+      - frontend/**
+      - web/**
+      - client/**
+      - src/pages/**
+      - src/components/**
+    adjacent_domains:
+      - backend_api
+      - auth_permissions
+    contracts:
+      - frontend_navigation_contract
+      - api_contract
+    guards:
+      - frontend_guard
+
+  workflow_jobs:
+    risk: high
+    files:
+      - jobs/**
+      - workers/**
+      - tasks/**
+      - queues/**
+      - schedulers/**
+      - backend/**/jobs/**
+      - backend/**/workers/**
+    adjacent_domains:
+      - backend_api
+      - database_persistence
+      - external_integrations
+    contracts:
+      - workflow_lifecycle_contract
+      - idempotency_contract
+      - persistence_contract
+    guards:
+      - workflow_guard
+
+  database_persistence:
+    risk: high
+    files:
+      - migrations/**
+      - db/**
+      - database/**
+      - models/**
+      - schemas/**
+      - backend/**/models/**
+      - backend/**/schemas/**
+    adjacent_domains:
+      - backend_api
+      - workflow_jobs
+    contracts:
+      - persistence_contract
+    guards:
+      - persistence_guard
+
+  external_integrations:
+    risk: high
+    files:
+      - integrations/**
+      - clients/**
+      - adapters/**
+      - backend/**/integrations/**
+      - backend/**/clients/**
+      - backend/**/adapters/**
+    adjacent_domains:
+      - backend_api
+      - workflow_jobs
+    contracts:
+      - external_integration_contract
+      - idempotency_contract
+    guards:
+      - integration_guard
+
+  auth_permissions:
+    risk: critical
+    files:
+      - auth/**
+      - permissions/**
+      - security/**
+      - backend/**/auth/**
+      - backend/**/permissions/**
+      - backend/**/security/**
+      - frontend/**/auth/**
+    adjacent_domains:
+      - backend_api
+      - frontend_ui
+      - database_persistence
+    contracts:
+      - auth_permission_contract
+      - persistence_contract
+    guards:
+      - auth_guard
+
+  cso_tooling:
+    risk: medium
+    files:
+      - change-safety-os/**
+      - bin/**
+      - change_safety_os/**
+      - config/**
+      - skills/**
+      - templates/**
+      - AGENTS.md
+      - CLAUDE.md
+    adjacent_domains: []
+    contracts: []
+    guards:
+      - cso_guard

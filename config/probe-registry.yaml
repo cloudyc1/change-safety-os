@@ -1,0 +1,26 @@
+probes:
+  backend_smoke:
+    required_for:
+      - backend_api
+      - workflow_jobs
+    command: ""
+    note: Configure a project-specific backend smoke command, for example pytest or an API verification script.
+
+  frontend_smoke:
+    required_for:
+      - frontend_ui
+    command: ""
+    note: Configure a project-specific frontend smoke command, for example npm run build or a browser smoke script.
+
+  integration_smoke:
+    required_for:
+      - external_integrations
+      - workflow_jobs
+    command: ""
+    note: Configure a project-specific integration smoke command or leave as a recorded manual gap.
+
+  auth_smoke:
+    required_for:
+      - auth_permissions
+    command: ""
+    note: Configure a project-specific auth and permission smoke command.

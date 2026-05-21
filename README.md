@@ -331,61 +331,6 @@ CSO 不是自动测试的替代品，也不是代码审查的替代品。
 
 CSO 也不是静态权限系统。不要把 graph 当成“只能改这些文件”的限制。真实项目里，为了完整修复问题，经常需要跨文件、跨链路修改。CSO 要求的是：你可以改，但改完必须证明相邻链路没有被破坏。
 
-## 维护者开发
-
-如果你要开发 CSO 本身，可以 clone 本仓库后安装依赖：
-
-```bash
-python3 -m pip install -r requirements.txt
-```
-
-运行测试：
-
-```bash
-python3 -m pytest tests -q
-```
-
-检查 Python 文件是否可编译：
-
-```bash
-python3 -m compileall change_safety_os bin
-```
-
-本地可编辑安装：
-
-```bash
-python3 -m pip install -e .
-cso --help
-```
-
-构建发布产物：
-
-```bash
-python3 -m build
-python3 -m twine check dist/*
-```
-
-## 发布到 PyPI
-
-本项目的 PyPI 包名是 `secso`。GitHub release 发布后，会通过 Trusted Publisher 自动发布。
-
-PyPI Trusted Publisher 配置应保持：
-
-```text
-Project name: secso
-Repository: cloudyc1/change-safety-os
-Workflow: publish.yml
-Environment: pypi
-```
-
-发布新版本前，需要先修改 `pyproject.toml` 里的版本号，然后创建 GitHub Release。
-
-例如：
-
-```bash
-git tag v0.1.1
-git push origin v0.1.1
-```
 
 然后在 GitHub 页面创建 release，选择对应 tag 并发布。
 

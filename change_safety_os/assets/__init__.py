@@ -1,2 +1,1 @@
-"""Packaged default configuration and Codex skill assets."""
-
+"""Packaged default configuration, templates, and optional agent adapter assets."""

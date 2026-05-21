@@ -1,19 +1,23 @@
-# Optional AGENTS.md Snippet
+# Optional AI Agent Instructions Snippet
 
-Use this snippet if the project wants Change Safety OS to become mandatory.
+Use this snippet if the project wants Change Safety OS to become mandatory for
+AI coding agents. Put it in the instruction file your agent reads, for example
+`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, or `.cursor/rules/*.mdc`.
 
 ```md
 ## Change Safety OS
 
-Use the `change-safety` skill before and after non-trivial code changes. Trigger
-it by default for bug fixes, features, refactors, shared helpers, persisted
-state, workflow status, scheduling, queues, billing, permissions, frontend
-navigation, external integrations, production regressions, and suspected side
-effects.
+Use Change Safety OS before and after non-trivial code changes. If the agent has
+a native CSO adapter or skill, use it. Otherwise run the `cso` CLI directly.
+Trigger it by default for bug fixes, features, refactors, shared helpers,
+persisted state, workflow status, scheduling, queues, billing, permissions,
+frontend navigation, external integrations, production regressions, and
+suspected side effects.
 
 Project-specific high-risk domains, protocol fields, contracts, and verification
-commands must live in this repo's `AGENTS.md` and `change-safety-os/config/*.yaml`.
-Do not put one project's domain rules into the global skill.
+commands must live in this repo's agent instruction file and
+`change-safety-os/config/*.yaml`. Do not put one project's domain rules into a
+global agent skill or adapter.
 
 Before editing code for any non-trivial task, start a safety record:
 

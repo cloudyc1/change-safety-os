@@ -46,14 +46,17 @@ When the user asks to install CSO:
    `python3 -m pip install git+https://github.com/cloudyc1/change-safety-os.git`
    before the package is published to PyPI.
 2. Run `cso init` from the target project root.
-3. Merge `change-safety-os/templates/agents-snippet.md` into the project's
-   `AGENTS.md`, adapting project-specific high-risk workflows, fields, and
-   required checks.
-4. Confirm the project can run `cso finalize` after a safety record exists.
+3. Review `change-safety-os/project-profile.yaml`,
+   `change-safety-os/config/*.yaml`, and
+   `change-safety-os/graph/workflow-graph.json`.
+4. Merge `change-safety-os/templates/agents-snippet.md` into the instruction
+   file the agent reads, such as `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
+   `.cursorrules`, or `.cursor/rules/*.mdc`.
+5. Confirm the project can run `cso finalize` after a safety record exists.
 
-If the repository only contains the skill but not the CLI, explain that the skill
-can guide behavior but executable safety checks require the `secso` package and
-a project-local `change-safety-os/config` directory.
+If the repository only contains the skill but not the CLI, explain that the
+adapter can guide behavior but executable safety checks require the `secso`
+package and a project-local `change-safety-os/config` directory.
 
 ## Before editing
 

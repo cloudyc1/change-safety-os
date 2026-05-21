@@ -8,6 +8,9 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 from change_safety_os import cli
+from change_safety_os.core.config_loader import SafetyConfig
+from change_safety_os.core.project_scanner import build_project_config, scan_project, write_yaml
+from change_safety_os.core.workflow_graph import build_workflow_graph, write_workflow_graph
 
 
 ASSET_PACKAGE = "change_safety_os.assets"
@@ -56,29 +59,81 @@ def init(argv: Optional[Iterable[str]] = None) -> int:
     )
     parser.add_argument("--force", action="store_true", help="Overwrite existing CSO config/template files.")
     parser.add_argument(
+        "--static-template",
+        action="store_true",
+        help="Copy the generic starter config instead of scanning the current project.",
+    )
+    parser.add_argument("--skip-graph", action="store_true", help="Do not build workflow graph after init.")
+    parser.add_argument(
+        "--install-codex-skill",
+        action="store_true",
+        help="Install the optional Codex change-safety skill into ~/.codex/skills.",
+    )
+    parser.add_argument(
         "--skip-codex-skill",
         "--skip-skill",
         action="store_true",
-        help="Do not install the change-safety Codex skill into ~/.codex/skills.",
+        help="Deprecated compatibility flag. Codex skill installation is opt-in by default.",
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     root = args.root.resolve()
     cso_root = root / "change-safety-os"
     copied = []
-    copied.extend(_copy_asset_dir("config", cso_root / "config", force=args.force))
     copied.extend(_copy_asset_dir("templates", cso_root / "templates", force=args.force))
 
+    profile = None
+    if args.static_template:
+        copied.extend(_copy_asset_dir("config", cso_root / "config", force=args.force))
+        mode = "static-template"
+    else:
+        profile = scan_project(root)
+        project_config = build_project_config(root, profile)
+        config_dir = cso_root / "config"
+        written = [
+            write_yaml(config_dir / "domains.yaml", {"domains": project_config["domains"]}, force=args.force),
+            write_yaml(config_dir / "contracts.yaml", project_config["contracts"], force=args.force),
+            write_yaml(config_dir / "guard-matrix.yaml", project_config["guards"], force=args.force),
+            write_yaml(config_dir / "probe-registry.yaml", project_config["probes"], force=args.force),
+            write_yaml(config_dir / "risk-rules.yaml", project_config["risk_rules"], force=args.force),
+            write_yaml(cso_root / "project-profile.yaml", profile.to_dict(), force=args.force),
+        ]
+        copied.extend(path for path, did_write in zip(
+            [
+                config_dir / "domains.yaml",
+                config_dir / "contracts.yaml",
+                config_dir / "guard-matrix.yaml",
+                config_dir / "probe-registry.yaml",
+                config_dir / "risk-rules.yaml",
+                cso_root / "project-profile.yaml",
+            ],
+            written,
+        ) if did_write)
+        mode = "project-scan"
+
     skill_path: Path | None = None
-    if not args.skip_codex_skill:
+    if args.install_codex_skill and not args.skip_codex_skill:
         skill_path = _install_codex_skill(force=args.force)
+
+    graph_path = None
+    if not args.skip_graph:
+        config = SafetyConfig.load(cso_root / "config")
+        graph = build_workflow_graph(config)
+        graph_path = cso_root / "graph" / "workflow-graph.json"
+        write_workflow_graph(graph, graph_path)
 
     print(f"project={root}")
     print(f"cso_dir={cso_root}")
+    print(f"mode={mode}")
     print(f"files_copied={len(copied)}")
+    if profile:
+        print(f"ecosystems={','.join(profile.ecosystems) or 'none'}")
+        print(f"ai_rule_files={','.join(profile.ai_rule_files) or 'none'}")
+    if graph_path:
+        print(f"graph={graph_path}")
     if skill_path:
         print(f"codex_skill={skill_path}")
-    print("next=merge change-safety-os/templates/agents-snippet.md into AGENTS.md and customize config/*.yaml")
+    print("next=review change-safety-os/project-profile.yaml and config/*.yaml, then merge templates/agents-snippet.md into your agent instruction file")
     return 0
 
 
@@ -87,7 +142,7 @@ def _print_help() -> None:
         """usage: cso <command> [options]
 
 Commands:
-  init                 Initialize ./change-safety-os config/templates and install Codex skill
+  init                 Scan project, initialize ./change-safety-os config/templates, and build graph
   run                  Run the full CSO gate (start/scan/contracts/trace/guards/probes/finalize)
   start                Start a safety record
   scan                 Scan changed files and update impact state

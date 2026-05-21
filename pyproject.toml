@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "secso"
 version = "0.1.0"
-description = "Project-agnostic change safety workflow and Codex skill for side-effect control."
+description = "Project-agnostic change safety CLI for AI agents and side-effect control."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -15,7 +15,7 @@ authors = [
 dependencies = [
   "PyYAML>=6.0"
 ]
-keywords = ["codex", "ai", "agents", "side-effects", "workflow", "cli"]
+keywords = ["ai", "agents", "side-effects", "workflow", "cli", "change-safety"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",

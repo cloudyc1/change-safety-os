@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+import yaml
 
 from change_safety_os.cli_app import main as cso_main
 from change_safety_os.core.change_context import ChangeContext
@@ -331,6 +332,54 @@ def test_cso_init_creates_project_config_and_templates(tmp_path: Path):
     assert (tmp_path / "change-safety-os" / "config" / "domains.yaml").exists()
     assert (tmp_path / "change-safety-os" / "config" / "contracts.yaml").exists()
     assert (tmp_path / "change-safety-os" / "templates" / "agents-snippet.md").exists()
+    assert (tmp_path / "change-safety-os" / "project-profile.yaml").exists()
+    assert (tmp_path / "change-safety-os" / "graph" / "workflow-graph.json").exists()
+
+
+def test_cso_init_scans_project_and_generates_specific_domains_and_guards(tmp_path: Path):
+    frontend = tmp_path / "frontend"
+    backend = tmp_path / "backend"
+    frontend.mkdir()
+    backend.mkdir()
+    (frontend / "package.json").write_text(
+        '{"scripts":{"lint":"eslint .","build":"vite build"}}',
+        encoding="utf-8",
+    )
+    (backend / "pyproject.toml").write_text("[project]\nname='api'\n", encoding="utf-8")
+    (backend / "app").mkdir()
+    (backend / "app" / "main.py").write_text("from fastapi import FastAPI\napp = FastAPI()\n", encoding="utf-8")
+    (backend / "tests").mkdir()
+    (backend / "tests" / "test_api.py").write_text("def test_api():\n    assert True\n", encoding="utf-8")
+    (tmp_path / "AGENTS.md").write_text("# agent rules\n", encoding="utf-8")
+
+    exit_code = cso_main(["init", "--root", str(tmp_path), "--skip-skill"])
+
+    assert exit_code == 0
+    config_dir = tmp_path / "change-safety-os" / "config"
+    domains = yaml.safe_load((config_dir / "domains.yaml").read_text(encoding="utf-8"))["domains"]
+    guards = yaml.safe_load((config_dir / "guard-matrix.yaml").read_text(encoding="utf-8"))["guards"]
+    profile = yaml.safe_load((tmp_path / "change-safety-os" / "project-profile.yaml").read_text(encoding="utf-8"))
+
+    assert sorted(domains) == ["agent_rules", "backend_api", "frontend_ui"]
+    assert domains["backend_api"]["files"] == ["backend/**"]
+    assert domains["frontend_ui"]["files"] == ["frontend/**"]
+    assert guards["backend_guard"]["commands"] == ["cd backend && python -m pytest"]
+    assert guards["frontend_guard"]["commands"] == [
+        "cd frontend && npm run lint",
+        "cd frontend && npm run build",
+    ]
+    assert profile["ecosystems"] == ["javascript", "python"]
+    assert profile["ai_rule_files"] == ["AGENTS.md"]
+
+
+def test_cso_init_static_template_mode_preserves_generic_config(tmp_path: Path):
+    exit_code = cso_main(["init", "--root", str(tmp_path), "--static-template", "--skip-skill"])
+
+    assert exit_code == 0
+    domains = yaml.safe_load(
+        (tmp_path / "change-safety-os" / "config" / "domains.yaml").read_text(encoding="utf-8")
+    )["domains"]
+    assert "workflow_jobs" in domains
 
 
 def test_cso_graph_build_update_and_query(tmp_path: Path, capsys: pytest.CaptureFixture[str]):

@@ -1,0 +1,49 @@
+contracts:
+  api_contract:
+    owner: project/backend
+    invariants:
+      - Request and response shapes remain compatible with every documented caller.
+      - Error status, retry behavior, pagination, filtering, and sorting semantics do not change silently.
+      - New API behavior is covered by an automated test or an explicitly recorded manual gap.
+
+  frontend_navigation_contract:
+    owner: project/frontend
+    invariants:
+      - Direct entry, refresh, back/forward, continue, and success-return paths are checked separately.
+      - Existing completed and historical records remain readable unless the change explicitly redefines them.
+      - UI state derived from URL, local storage, server state, and global context stays consistent.
+
+  workflow_lifecycle_contract:
+    owner: project/workflows
+    invariants:
+      - Work does not become terminal while required downstream work is still active.
+      - Work eventually becomes terminal after all required downstream work reaches terminal state.
+      - Retry, cancellation, timeout, and backfill paths preserve idempotency and do not create duplicate visible work.
+
+  persistence_contract:
+    owner: project/persistence
+    invariants:
+      - Schema and model changes preserve existing data or include a documented migration path.
+      - Reads and writes agree on field meaning, nullability, uniqueness, and lifecycle.
+      - Historical records remain queryable unless an explicit cleanup or archival rule is part of the change.
+
+  external_integration_contract:
+    owner: project/integrations
+    invariants:
+      - External request payloads, callbacks, identifiers, retries, and timeout handling remain compatible.
+      - External side effects are idempotent or protected by dedupe keys.
+      - Integration failures are visible in logs, state, or user-facing result details.
+
+  auth_permission_contract:
+    owner: project/security
+    invariants:
+      - Authentication, authorization, tenant isolation, and role checks are not broadened silently.
+      - Admin, owner, member, and anonymous paths are tested or explicitly recorded as gaps.
+      - Sensitive state cannot be read or mutated through a route that did not previously allow it.
+
+  idempotency_contract:
+    owner: project/platform
+    invariants:
+      - Shared identifiers, dedupe keys, and run keys keep a documented uniqueness scope.
+      - Re-running a task, callback, or repair command does not double-charge, double-publish, or duplicate user-visible records.
+      - Partial failure recovery uses the same business rules as the normal success path.

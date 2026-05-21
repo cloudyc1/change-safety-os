@@ -1,0 +1,28 @@
+guards:
+  backend_guard:
+    commands:
+      - python3 -c "raise SystemExit('Configure backend_guard in change-safety-os/config/guard-matrix.yaml for this project')"
+
+  frontend_guard:
+    commands:
+      - python3 -c "raise SystemExit('Configure frontend_guard in change-safety-os/config/guard-matrix.yaml for this project')"
+
+  workflow_guard:
+    commands:
+      - python3 -c "raise SystemExit('Configure workflow_guard in change-safety-os/config/guard-matrix.yaml for this project')"
+
+  persistence_guard:
+    commands:
+      - python3 -c "raise SystemExit('Configure persistence_guard in change-safety-os/config/guard-matrix.yaml for this project')"
+
+  integration_guard:
+    commands:
+      - python3 -c "raise SystemExit('Configure integration_guard in change-safety-os/config/guard-matrix.yaml for this project')"
+
+  auth_guard:
+    commands:
+      - python3 -c "raise SystemExit('Configure auth_guard in change-safety-os/config/guard-matrix.yaml for this project')"
+
+  cso_guard:
+    commands:
+      - python3 -m compileall change_safety_os bin

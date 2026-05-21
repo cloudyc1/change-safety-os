@@ -319,6 +319,32 @@ def build_graph(argv: Optional[Iterable[str]] = None) -> int:
     return 0
 
 
+def update_graph(argv: Optional[Iterable[str]] = None) -> int:
+    parser = argparse.ArgumentParser(description="Update the CSO workflow graph and report whether it changed.")
+    parser.add_argument("--config-dir", type=Path, default=DEFAULT_CONFIG_DIR)
+    parser.add_argument("--output", type=Path, default=DEFAULT_GRAPH_PATH)
+    args = parser.parse_args(list(argv) if argv is not None else None)
+
+    old_fingerprint = ""
+    if args.output.exists():
+        old_graph = load_workflow_graph(args.output)
+        old_fingerprint = str(old_graph.get("fingerprint") or "")
+
+    config = SafetyConfig.load(args.config_dir)
+    graph = build_workflow_graph(config)
+    write_workflow_graph(graph, args.output)
+
+    status = "unchanged" if old_fingerprint == graph.fingerprint else "updated"
+    domain_count = sum(1 for node in graph.nodes if node.type == "domain")
+    print(args.output)
+    print(f"status={status}")
+    print(f"domains={domain_count}")
+    print(f"nodes={len(graph.nodes)}")
+    print(f"edges={len(graph.edges)}")
+    print(f"fingerprint={graph.fingerprint}")
+    return 0
+
+
 def query_graph(argv: Optional[Iterable[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Query CSO workflow graph impact by domain or file.")
     parser.add_argument("--config-dir", type=Path, default=DEFAULT_CONFIG_DIR)

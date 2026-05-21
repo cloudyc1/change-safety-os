@@ -1,0 +1,44 @@
+risk_order:
+  - low
+  - medium
+  - high
+  - critical
+
+default_policy:
+  high_or_critical:
+    needs_work_without_required_guards: true
+    require_recorded_adjacent_workflows: true
+  failed_guard:
+    needs_work: true
+  unchecked_gap:
+    needs_human_decision: true
+
+protected_fields:
+  - id
+  - status
+  - state
+  - source
+  - type
+  - ref_id
+  - task_id
+  - job_id
+  - batch_id
+  - run_key
+  - dedupe_key
+  - user_id
+  - account_id
+  - tenant_id
+  - organization_id
+  - role
+  - permission
+  - token
+  - price
+  - amount
+  - transaction_id
+  - external_id
+  - callback_url
+  - redirect_url
+  - "webhook_*"
+  - "*_status"
+  - "*_state"
+  - "*_id"

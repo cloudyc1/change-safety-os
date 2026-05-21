@@ -10,42 +10,57 @@ target change works and that adjacent behavior was checked.
 ## What Is Included
 
 - `skills/change-safety/SKILL.md`: Codex skill that triggers on risky code changes.
-- `bin/*.py`: CLI entry points for starting records, scanning impact, graph queries, guards, probes, and finalization.
+- `cso`: packaged CLI for starting records, scanning impact, graph queries, guards, probes, and finalization.
+- `bin/*.py`: compatibility entry points for cloned-repo usage.
 - `change_safety_os/`: Python implementation.
 - `config/*.yaml`: generic starter config. Replace with project-specific domains, contracts, and checks.
 - `templates/agents-snippet.md`: AGENTS.md snippet for making CSO mandatory in a repo.
 - `tests/`: unit tests for the CSO tool itself.
 
-## Install For Codex
+## Install
 
-From a cloned copy of this repository:
-
-```bash
-mkdir -p ~/.codex/skills/change-safety
-cp skills/change-safety/SKILL.md ~/.codex/skills/change-safety/SKILL.md
-```
-
-Then copy this repository's contents into the target project as `change-safety-os/`.
-Do not copy the `.git` directory into the target project.
-
-Example:
+When the package is published to PyPI:
 
 ```bash
-git clone https://github.com/cloudyc1/change-safety-os.git /tmp/change-safety-os
-mkdir -p /path/to/project/change-safety-os
-rsync -a --exclude='.git/' /tmp/change-safety-os/ /path/to/project/change-safety-os/
+python3 -m pip install change-safety-os
 ```
 
-Finally merge `templates/agents-snippet.md` into the target project's `AGENTS.md`.
+The package name is `change-safety-os`; the installed command is `cso`.
+Do not use `pip install cso` unless you intentionally want a different package
+with that PyPI name.
+
+Before PyPI release, install directly from GitHub:
+
+```bash
+python3 -m pip install "git+https://github.com/cloudyc1/change-safety-os.git"
+```
+
+Then initialize CSO inside each target project:
+
+```bash
+cd /path/to/project
+cso init
+```
+
+`cso init` creates `./change-safety-os/config`, `./change-safety-os/templates`,
+and installs the global Codex skill to `~/.codex/skills/change-safety/SKILL.md`.
+Finally merge `change-safety-os/templates/agents-snippet.md` into the target project's
+`AGENTS.md`.
+
+If `cso` is not found after installation, add the Python scripts directory printed
+by `python3 -m site --user-base` plus `/bin` to `PATH`, or invoke the script by its
+absolute path. If you use pyenv, make sure the Python version used for installation
+is active, then run `pyenv rehash`.
 
 ## One-Prompt Install
 
 In a target project, you can ask Codex:
 
 ```text
-Install CSO from https://github.com/cloudyc1/change-safety-os:
-1. Copy skills/change-safety/SKILL.md to ~/.codex/skills/change-safety/SKILL.md.
-2. Copy the repository contents into ./change-safety-os.
+Install CSO:
+1. Run python3 -m pip install git+https://github.com/cloudyc1/change-safety-os.git
+   unless change-safety-os is already available from PyPI.
+2. Run cso init in this repository.
 3. Merge change-safety-os/templates/agents-snippet.md into AGENTS.md.
 4. Adapt change-safety-os/config/*.yaml to this project's domains, contracts, and checks.
 ```
@@ -70,18 +85,24 @@ the target project's `AGENTS.md` and `change-safety-os/config/*.yaml`.
 Run these commands from the target project root.
 
 ```bash
-python3 change-safety-os/bin/start_change.py --goal "fix checkout retry bug"
-python3 change-safety-os/bin/query_graph.py --file backend/services/orders.py
-python3 change-safety-os/bin/scan_impact.py
-python3 change-safety-os/bin/check_contracts.py
-python3 change-safety-os/bin/trace_callers.py
-python3 change-safety-os/bin/run_guards.py
-python3 change-safety-os/bin/run_probes.py --dry-run
-python3 change-safety-os/bin/ack_contracts.py --note "reviewed impacted contracts"
-python3 change-safety-os/bin/finalize_change.py
+cso start --goal "fix checkout retry bug"
+cso graph query --file backend/services/orders.py
+cso scan
+cso contracts
+cso trace
+cso guards
+cso probes --dry-run
+cso ack --note "reviewed impacted contracts"
+cso finalize
 ```
 
-`finalize_change.py` returns one of:
+For autonomous or one-shot use:
+
+```bash
+cso run --goal "fix checkout retry bug" --dry-run
+```
+
+`cso finalize` returns one of:
 
 - `ready_to_deliver`: target change and side-effect checks are ready.
 - `needs_work`: keep fixing, testing, or narrowing the change.
@@ -92,14 +113,15 @@ python3 change-safety-os/bin/finalize_change.py
 Build or refresh the graph after changing CSO config:
 
 ```bash
-python3 change-safety-os/bin/build_graph.py
+cso graph build
+cso graph update
 ```
 
 Query by file or domain:
 
 ```bash
-python3 change-safety-os/bin/query_graph.py --file backend/services/orders.py
-python3 change-safety-os/bin/query_graph.py --domain workflow_jobs
+cso graph query --file backend/services/orders.py
+cso graph query --domain workflow_jobs
 ```
 
 The graph is a review checklist, not an edit permission boundary. If the graph is incomplete,
@@ -119,6 +141,18 @@ Dependencies:
 ```bash
 python3 -m pip install -r requirements.txt
 ```
+
+Local package validation for maintainers:
+
+```bash
+python3 -m pip install -e .
+cso --help
+```
+
+This installs the current checkout in editable mode only to verify packaging.
+It is not the user-facing install command. End users should use
+`python3 -m pip install change-safety-os` after PyPI publishing, or the GitHub
+install command before publishing.
 
 ## License
 

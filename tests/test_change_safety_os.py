@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from change_safety_os.cli_app import main as cso_main
 from change_safety_os.core.change_context import ChangeContext
 from change_safety_os.core.config_loader import SafetyConfig
 from change_safety_os.core.contract_ack import ack_contracts
@@ -321,3 +322,28 @@ def test_workflow_graph_matches_files_and_round_trips_json(tmp_path: Path):
         ["workers/email_worker.py", "frontend/src/pages/Home.tsx"],
         loaded,
     ) == ["frontend", "scheduler"]
+
+
+def test_cso_init_creates_project_config_and_templates(tmp_path: Path):
+    exit_code = cso_main(["init", "--root", str(tmp_path), "--skip-skill"])
+
+    assert exit_code == 0
+    assert (tmp_path / "change-safety-os" / "config" / "domains.yaml").exists()
+    assert (tmp_path / "change-safety-os" / "config" / "contracts.yaml").exists()
+    assert (tmp_path / "change-safety-os" / "templates" / "agents-snippet.md").exists()
+
+
+def test_cso_graph_build_update_and_query(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    config_dir = _write_config(tmp_path)
+    graph_path = tmp_path / "graph" / "workflow-graph.json"
+
+    assert cso_main(["graph", "build", "--config-dir", str(config_dir), "--output", str(graph_path)]) == 0
+    assert graph_path.exists()
+
+    assert cso_main(["graph", "update", "--config-dir", str(config_dir), "--output", str(graph_path)]) == 0
+    update_output = capsys.readouterr().out
+    assert "status=unchanged" in update_output
+
+    assert cso_main(["graph", "query", "--graph-file", str(graph_path), "--file", "jobs/scheduler.py"]) == 0
+    query_output = capsys.readouterr().out
+    assert '"scheduler"' in query_output
